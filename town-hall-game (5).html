@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>This or That? · The Susan Collins Town Hall Game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0d2340;            /* campaign navy */
+    --navy-2:#143055;
+    --red:#b1232e;             /* campaign red */
+    --red-2:#cf3340;
+    --brass:#c9a24a;
+    --brass-lite:#e6cd86;
+    --marble:#f6f3ec;
+    --ink:#1a2230;
+    --dim:#aab6c7;
+    --teal:#2e9e84;
+    --dusty:#9aa1ad;
+    --line:rgba(246,243,236,.13);
+    --display:'Playfair Display', Georgia, serif;
+    --body:'Libre Franklin', system-ui, sans-serif;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family:var(--body); color:var(--marble);
+    background:
+      radial-gradient(900px 480px at 50% -6%, #16365f 0%, transparent 60%),
+      linear-gradient(180deg,#10294a 0%, var(--navy) 55%, #091a31 100%);
+    background-color:var(--navy);
+    min-height:100vh; -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+  body::before{ content:""; position:fixed; inset:0 0 auto 0; height:4px;
+    background:linear-gradient(90deg,var(--red) 0 50%, #fff 50% 50.4%, var(--navy-2) 50.4%); opacity:.0; }
+  .flagbar{ position:fixed; top:0; left:0; right:0; height:5px; z-index:40;
+    background:linear-gradient(90deg, var(--red), var(--brass), var(--red)); }
+  .wrap{ max-width:880px; margin:0 auto; padding:30px 20px 56px; }
+
+  /* header — looks like a campaign masthead */
+  header{ text-align:center; }
+  .crest{ display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:12px; }
+  .crest .star{ width:34px; height:34px; border-radius:50%; border:2px solid var(--brass);
+    display:flex; align-items:center; justify-content:center; color:var(--brass-lite); font-size:15px;
+    background:radial-gradient(circle at 50% 35%, #1a3a63, #0c2241); }
+  .crest .org{ font-weight:800; font-size:12px; letter-spacing:.24em; text-transform:uppercase; color:var(--brass-lite); }
+  h1{ font-family:var(--display); font-weight:800; margin:6px 0 4px; font-size:clamp(38px,8.5vw,72px);
+    line-height:.98; letter-spacing:-.01em; color:#fff; }
+  .sub{ font-size:clamp(14px,2.6vw,17px); color:var(--dim); font-weight:500; }
+  .sub b{ color:#fff; font-weight:700; }
+
+  .scorebar{ display:flex; gap:9px; justify-content:center; margin:18px 0 2px; flex-wrap:wrap; }
+  .pill{ background:rgba(255,255,255,.05); border:1px solid var(--line); border-radius:999px;
+    padding:7px 13px; font-size:12px; font-weight:600; color:var(--dim); display:flex; gap:7px; align-items:center; }
+  .pill .n{ font-family:var(--display); font-weight:800; font-size:17px; color:var(--brass-lite); }
+  .pill .n.teal{ color:var(--teal); }
+
+  .board{ margin-top:22px; }
+  .question{ text-align:center; font-family:var(--display); font-weight:800; font-size:clamp(19px,4vw,27px); color:#fff; margin-bottom:16px; }
+  .cards{ display:grid; grid-template-columns:1fr auto 1fr; align-items:stretch; gap:14px; }
+
+  .card{ position:relative; text-align:left; cursor:pointer; color:var(--ink);
+    background:var(--marble); border:none; border-radius:14px; padding:0 0 18px;
+    box-shadow:0 10px 26px rgba(0,0,0,.42); transition:transform .14s ease, box-shadow .14s ease;
+    font-family:var(--body); display:flex; flex-direction:column; min-height:300px; outline:none; overflow:hidden; }
+  .card:hover{ transform:translateY(-5px); box-shadow:0 18px 36px rgba(0,0,0,.5); }
+  .card:focus-visible{ box-shadow:0 0 0 4px var(--brass), 0 10px 26px rgba(0,0,0,.42); }
+  .card .body{ padding:18px 20px 0; display:flex; flex-direction:column; flex:1; }
+  .card .emoji{ font-size:40px; line-height:1; }
+  .card .label{ font-weight:800; font-size:clamp(17px,2.9vw,21px); line-height:1.18; margin-top:12px; letter-spacing:-.01em; color:var(--ink); }
+  .card .tag{ margin-top:auto; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#9aa0ac; padding-top:14px; }
+  .card .pick{ margin-top:10px; font-weight:800; font-size:12px; color:var(--red); display:flex; align-items:center; gap:6px; }
+
+  /* event card top strip */
+  .card .topstrip{ height:8px; background:linear-gradient(90deg,var(--navy),var(--navy-2)); }
+  .card.collins .topstrip{ background:linear-gradient(90deg,var(--red),var(--red-2)); }
+
+  /* portrait */
+  .portrait{ width:100%; height:152px; overflow:hidden; position:relative; background:#e9edf2; }
+  .portrait svg{ width:100%; height:100%; display:block; }
+  .portrait img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 22%; }
+
+  .card .year{ position:absolute; top:14px; right:14px; font-family:var(--display); font-weight:800; font-size:30px;
+    color:var(--ink); background:rgba(246,243,236,.92); padding:2px 10px; border-radius:9px;
+    opacity:0; transform:scale(.6) rotate(-6deg); transition:.3s; z-index:4; }
+  .card.revealed .year{ opacity:1; transform:scale(1) rotate(-3deg); }
+  .card.revealed .pick{ visibility:hidden; }
+  .card.win{ background:#eafaf4; }
+  .card.win .topstrip{ background:var(--teal); }
+  .card.lose{ background:#ecebe6; }
+  .card.lose .label,.card.lose .tag{ color:#8f95a0; }
+  .card.lose .year{ color:var(--dusty); }
+  .card.lose .portrait{ filter:grayscale(.85) opacity(.7); }
+  .card.lose .emoji{ filter:grayscale(1) opacity(.5); }
+  .stamp{ position:absolute; bottom:14px; right:16px; font-family:var(--display); font-weight:800; font-style:italic;
+    font-size:14px; opacity:0; transform:rotate(-4deg) scale(.85); transition:.25s .1s; z-index:4; }
+  .card.win .stamp{ color:var(--teal); }
+  .card.lose .stamp{ color:var(--dusty); }
+  .card.revealed .stamp{ opacity:1; transform:rotate(-4deg) scale(1); }
+
+  .vs{ align-self:center; font-family:var(--display); font-weight:800; font-size:20px; color:var(--navy);
+    background:radial-gradient(circle at 50% 35%, var(--brass-lite), var(--brass)); width:56px; height:56px;
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 8px 18px rgba(0,0,0,.5); flex:none; border:2px solid #f0dca0; }
+
+  .verdict{ text-align:center; margin-top:20px; min-height:60px; }
+  .verdict .pop{ font-family:var(--display); font-weight:800; font-style:italic; font-size:clamp(21px,4.6vw,30px); }
+  .verdict .pop.right{ color:var(--teal); }
+  .verdict .pop.wrong{ color:var(--red-2); }
+  .verdict .punch{ color:var(--dim); font-weight:500; font-size:clamp(13.5px,2.5vw,16px); margin-top:7px; max-width:560px; margin:7px auto 0; }
+  .actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:16px; }
+  .btn{ font-family:var(--body); font-weight:800; font-size:15px; cursor:pointer; color:#fff;
+    background:var(--red); border:none; border-radius:11px; padding:13px 26px; box-shadow:0 5px 0 #7e1820; transition:.1s; }
+  .btn:hover{ transform:translateY(-2px); box-shadow:0 7px 0 #7e1820; }
+  .btn:active{ transform:translateY(2px); box-shadow:0 3px 0 #7e1820; }
+  .btn.ghost{ background:transparent; color:var(--marble); box-shadow:none; border:1px solid var(--line); }
+  .btn.ghost:hover{ border-color:var(--brass); color:var(--brass-lite); transform:none; }
+
+  footer{ margin-top:38px; text-align:center; color:var(--dim); font-size:12px; line-height:1.6; }
+  footer .fact{ max-width:600px; margin:0 auto 14px; }
+  footer b{ color:#fff; }
+  .disclaimer{ font-size:10.5px; letter-spacing:.04em; text-transform:uppercase; color:#6f7c91; margin-top:6px; }
+
+  .toast{ position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(18px);
+    background:var(--brass); color:var(--navy); font-weight:800; padding:11px 18px; border-radius:11px;
+    opacity:0; pointer-events:none; transition:.25s; box-shadow:0 10px 30px rgba(0,0,0,.4); z-index:50; }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* confetti */
+  .confetti{ position:fixed; top:-12px; width:9px; height:14px; z-index:60; pointer-events:none; border-radius:1px; }
+  @keyframes fall{ to{ transform:translateY(105vh) rotate(720deg); opacity:.9; } }
+
+  @media (max-width:640px){
+    .cards{ grid-template-columns:1fr; }
+    .vs{ margin:-2px auto; }
+    .card{ min-height:0; }
+  }
+  @media (prefers-reduced-motion:reduce){ *{ transition:none !important; } .confetti{ display:none; } }
+</style>
+</head>
+<body>
+<div class="flagbar"></div>
+<div class="wrap">
+
+  <header>
+    <div class="crest"><span class="star">★</span><span class="org">A Maine Civics Quiz</span></div>
+    <h1>This or That?</h1>
+    <p class="sub">Which happened <b>more recently</b> — the thing on the left, or the thing on the right?</p>
+
+    <div class="scorebar">
+      <span class="pill">Score <span class="n teal" id="score">0</span></span>
+      <span class="pill">Streak <span class="n" id="streak">0</span></span>
+      <span class="pill">Newer than her last town hall <span class="n" id="tally">0</span></span>
+    </div>
+  </header>
+
+  <main class="board">
+    <div class="question" id="question">Which one was more recent?</div>
+    <div class="cards">
+      <button class="card" id="cardA"></button>
+      <div class="vs">VS</div>
+      <button class="card" id="cardB"></button>
+    </div>
+
+    <div class="verdict" id="verdict"></div>
+    <div class="actions" id="actions" style="display:none">
+      <button class="btn" id="nextBtn">Next round →</button>
+      <button class="btn ghost" id="shareBtn">Share this</button>
+    </div>
+  </main>
+
+  <footer>
+    <p class="fact">
+      A friendly civics reminder with a true premise: by multiple accounts, Sen. Susan Collins hasn’t held
+      an open public town hall in Maine in roughly <b>25 years</b> — since her first years in the Senate.
+      Every event in this quiz really did happen more recently.
+    </p>
+    <p class="disclaimer">Paid for by Graham Platner for Senate</p>
+  </footer>
+</div>
+
+<div class="toast" id="toast">Copied!</div>
+
+<!-- Illustrated likeness (caricature — no photo rights needed).
+     To use a cleared/official photo instead, see the note in paintCard(). -->
+<template id="portraitSVG">
+  <svg viewBox="0 0 160 152" xmlns="http://www.w3.org/2000/svg" aria-label="Senator, illustrated">
+    <defs>
+      <linearGradient id="hall" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#eef1f5"/><stop offset="1" stop-color="#dde3ea"/>
+      </linearGradient>
+    </defs>
+    <rect width="160" height="152" fill="url(#hall)"/>
+    <!-- blurred Capitol arches -->
+    <g fill="#d3dae3" opacity="0.8">
+      <path d="M20 152 V70 a18 18 0 0 1 36 0 V152 Z"/>
+      <path d="M104 152 V70 a18 18 0 0 1 36 0 V152 Z"/>
+      <rect x="74" y="40" width="12" height="112"/>
+    </g>
+    <!-- shoulders / red blazer -->
+    <path d="M28 152 C30 116 50 104 80 104 C110 104 130 116 132 152 Z" fill="#b1232e"/>
+    <!-- collar -->
+    <path d="M64 108 L80 122 L96 108 L92 130 L68 130 Z" fill="#c9303c"/>
+    <path d="M80 122 L80 152" stroke="#8e1a23" stroke-width="2"/>
+    <!-- red buttons -->
+    <circle cx="80" cy="132" r="3.4" fill="#8e1a23"/><circle cx="80" cy="146" r="3.4" fill="#8e1a23"/>
+    <!-- neck -->
+    <rect x="71" y="86" width="18" height="22" rx="8" fill="#ecc7a6"/>
+    <!-- pearls -->
+    <g fill="#fbf7ef"><circle cx="70" cy="104" r="2"/><circle cx="80" cy="108" r="2"/><circle cx="90" cy="104" r="2"/></g>
+    <!-- head -->
+    <ellipse cx="80" cy="64" rx="24" ry="26" fill="#f1d4b4"/>
+    <!-- ears + pearl earrings -->
+    <circle cx="56" cy="66" r="4" fill="#f1d4b4"/><circle cx="104" cy="66" r="4" fill="#f1d4b4"/>
+    <circle cx="56" cy="72" r="2.3" fill="#fbf7ef"/><circle cx="104" cy="72" r="2.3" fill="#fbf7ef"/>
+    <!-- feathered dark hair, side-swept bang -->
+    <path d="M54 60 C50 34 66 26 80 26 C96 26 110 34 106 60
+             C108 50 102 44 96 42 C99 47 98 52 96 55
+             C95 47 88 42 80 42 C74 42 69 45 67 50
+             C72 40 60 40 58 50 C61 44 56 46 56 52 C54 54 54 58 54 60 Z" fill="#2c241d"/>
+    <path d="M58 44 C66 38 78 38 86 42 C76 40 66 42 60 50 Z" fill="#3d332a"/>
+    <!-- eyes, brows, smile -->
+    <g fill="#2a221c"><circle cx="71" cy="62" r="1.9"/><circle cx="89" cy="62" r="1.9"/></g>
+    <g stroke="#2c241d" stroke-width="1.6" stroke-linecap="round">
+      <path d="M66 57 Q71 55 75 57"/><path d="M85 57 Q89 55 94 57"/>
+    </g>
+    <path d="M71 74 Q80 81 89 74" fill="none" stroke="#b0584f" stroke-width="2.2" stroke-linecap="round"/>
+    <!-- little flag pin on lapel -->
+    <rect x="63" y="116" width="8" height="5.5" fill="#21386a"/>
+    <rect x="63" y="116" width="8" height="2.7" fill="#b1232e"/>
+  </svg>
+</template>
+
+<script>
+const COLLINS = {
+  isCollins:true, label:'Susan Collins holds a town hall',
+  yearText:'~2000', year:2000, tag:'Her first years in the Senate',
+};
+
+/* A mix of fun + political — all real, all after ~2000. Tone: warm and factual. */
+const EVENTS = [
+  // — political / Maine —
+  { emoji:'🏛️', label:'Angus King finished his run as Maine’s governor', year:2003, punch:'Maine has had three new governors since she last took town-hall questions.' },
+  { emoji:'🗳️', label:'Angus King was elected to the U.S. Senate', year:2012, punch:'Her own Maine Senate seatmate was elected after her last town hall.' },
+  { emoji:'🧑‍⚖️', label:'Paul LePage was elected governor of Maine', year:2010, punch:'A whole LePage era began more recently than her last town hall.' },
+  { emoji:'👋', label:'Olympia Snowe left the U.S. Senate', year:2013, punch:'Her longtime Senate partner came and went. The town hall never came.' },
+  { emoji:'⭐', label:'Janet Mills became Maine’s first woman governor', year:2018, punch:'Maine made history in the Blaine House more recently than Collins held a town hall.' },
+  { emoji:'🎖️', label:'Jared Golden was first elected to Congress', year:2018, punch:'A Marine vet joined Maine’s delegation more recently than she took questions.' },
+  { emoji:'🥇', label:'Maine became the first state to adopt ranked-choice voting', year:2016, punch:'Maine reinvented how it votes. The town hall’s still not on the ballot.' },
+  { emoji:'💍', label:'Maine voted to allow same-sex marriage at the ballot box', year:2012, punch:'Maine made history at the polls more recently than her last town hall.' },
+  { emoji:'🇺🇸', label:'Barack Obama was elected president', year:2008, punch:'A two-term presidency began more recently than her last town hall.' },
+  { emoji:'🥧', label:'The whoopie pie became Maine’s official state treat', year:2011, punch:'Maine named an official state treat more recently than her last town hall.' },
+  { emoji:'⚾', label:'The Sea Dogs first played as the “Maine Whoopie Pies”', year:2019, punch:'Even Hadlock Field got whoopie pies before Maine got a town hall.' },
+  // — fun / pop culture —
+  { emoji:'🐊', label:'Crocs were invented', year:2002, punch:'Crocs. More recent than her last town hall. Let that sink in.' },
+  { emoji:'⚡', label:'The final Harry Potter movie hit theaters', year:2011, punch:'An eight-film saga began AND ended after Collins last took open questions.' },
+  { emoji:'👍', label:'Facebook was founded', year:2004, punch:'You could poke a friend before you could town-hall your senator.' },
+  { emoji:'📱', label:'The first iPhone went on sale', year:2007, punch:'Eighteen iPhone generations later — still no town hall.' },
+  { emoji:'📞', label:'The Motorola Razr flip phone dropped', year:2004, punch:'You flipped it open. She never opened the floor.' },
+  { emoji:'▶️', label:'YouTube was founded', year:2005, punch:'A whole website of videos exists — of town halls she did not hold.' },
+  { emoji:'💶', label:'The Euro entered circulation', year:2002, punch:'Twelve countries adopted a new currency before Mainers got a town hall.' },
+  // — MTV era —
+  { emoji:'😈', label:'Ashton Kutcher started “Punk’d” on MTV', year:2003, punch:'A decade of celebrity pranks aired before Maine got one town hall.' },
+  { emoji:'🦇', label:'“The Osbournes” premiered on MTV', year:2002, punch:'Ozzy let cameras into his house more recently than Collins took questions.' },
+  { emoji:'🚗', label:'“Pimp My Ride” premiered on MTV', year:2004, punch:'Xzibit rebuilt more cars than Collins held town halls. (The number is zero.)' },
+  { emoji:'📺', label:'MTV’s “TRL” aired its series finale', year:2008, punch:'An entire era of MTV ended more recently than her last town hall.' },
+  { emoji:'🏖️', label:'“Jersey Shore” premiered on MTV', year:2009, punch:'We met Snooki before Mainers met Collins at a town hall this century.' },
+  { emoji:'⛰️', label:'“Laguna Beach” premiered on MTV', year:2004, punch:'Reality TV found Orange County before Collins found a town hall.' },
+  // — Maine + fun —
+  { emoji:'🎬', label:'Portland’s own Anna Kendrick broke out in “Twilight”', year:2008, punch:'A Maine kid became a movie star after Collins’s last town hall.' },
+  { emoji:'🩺', label:'Lewiston’s Patrick Dempsey became “McDreamy”', year:2005, punch:'McDreamy arrived more recently than Maine’s last Collins town hall.' },
+];
+
+let deck=[], score=0, streak=0, tally=0, cur=null, locked=false;
+const $ = id => document.getElementById(id);
+const cardA=$('cardA'), cardB=$('cardB');
+const portraitMarkup = $('portraitSVG').innerHTML;
+
+function loadBest(){ try{ return JSON.parse(localStorage.getItem('collinsGameBest')||'null'); }catch(e){ return null; } }
+function saveBest(v){ try{ localStorage.setItem('collinsGameBest', JSON.stringify(v)); }catch(e){} }
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+const QUESTIONS = ['Which one was more recent?','Which happened more recently?','Pick the more recent one.','Which came later?'];
+
+function paintCard(el, data){
+  const collins = !!data.isCollins;
+  el.className = 'card' + (collins ? ' collins' : '');
+  // To use a real cleared photo: replace `${portraitMarkup}` with `<img src="collins.jpg" alt="Susan Collins">`
+  const visual = collins
+    ? `<div class="portrait">${portraitMarkup}</div>`
+    : `<div class="portrait" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#16365f,#0d2340)"><span style="font-size:64px">${data.emoji}</span></div>`;
+  el.innerHTML = `
+    <div class="topstrip"></div>
+    ${visual}
+    <div class="body">
+      <div class="label">${data.label}</div>
+      <div class="tag">${collins ? data.tag : 'tap if this is more recent'}</div>
+      <div class="pick">▶ I pick this one</div>
+    </div>
+    <div class="year"></div>
+    <div class="stamp"></div>`;
+}
+
+function nextRound(){
+  if(!deck.length) deck = shuffle(EVENTS);
+  const ev = deck.pop();
+  const collinsLeft = Math.random() < 0.5;
+  cur = { ev, collinsLeft }; locked = false;
+  paintCard(cardA, collinsLeft ? COLLINS : ev);
+  paintCard(cardB, collinsLeft ? ev : COLLINS);
+  $('verdict').innerHTML=''; $('actions').style.display='none';
+  $('question').textContent = QUESTIONS[Math.floor(Math.random()*QUESTIONS.length)];
+}
+
+function choose(side){
+  if(locked) return; locked = true;
+  const chosenIsCollins = (side==='left') === cur.collinsLeft;
+  const correct = !chosenIsCollins;
+  const collinsEl = cur.collinsLeft ? cardA : cardB;
+  const eventEl   = cur.collinsLeft ? cardB : cardA;
+
+  collinsEl.querySelector('.year').textContent = COLLINS.yearText;
+  eventEl.querySelector('.year').textContent   = cur.ev.year;
+  collinsEl.classList.add('revealed','lose');
+  eventEl.classList.add('revealed','win');
+  collinsEl.querySelector('.stamp').textContent = 'still waiting';
+  eventEl.querySelector('.stamp').textContent   = 'more recent ✓';
+
+  tally++;
+  if(correct){ score++; streak++; burst(); } else { streak = 0; }
+  $('score').textContent=score; $('streak').textContent=streak; $('tally').textContent=tally;
+  const best=loadBest(); if(best===null || score>best) saveBest(score);
+
+  const head = correct ? ['Correct!','Yep.','That’s the one.','You got it.'][Math.floor(Math.random()*4)]
+                       : 'Actually — it’s the other one.';
+  let extra = (correct && streak>=5) ? ' Spoiler: it’s always the town hall. That’s kind of the point.' : '';
+  $('verdict').innerHTML = `
+    <div class="pop ${correct?'right':'wrong'}">${head}</div>
+    <div class="punch">${cur.ev.punch}${extra}</div>`;
+  $('actions').style.display='flex';
+  $('nextBtn').focus();
+}
+
+cardA.addEventListener('click', ()=>choose('left'));
+cardB.addEventListener('click', ()=>choose('right'));
+$('nextBtn').addEventListener('click', nextRound);
+
+$('shareBtn').addEventListener('click', async ()=>{
+  const line = `${cur.ev.label} (${cur.ev.year}) happened MORE RECENTLY than Susan Collins's last town hall (~2000). I'm ${score} for ${tally}.`;
+  const url = location.href;
+  try{
+    if(navigator.share){ await navigator.share({ title:'This or That? The Collins Town Hall Game', text:line, url }); return; }
+    await navigator.clipboard.writeText(line + ' ' + url);
+    showToast('Copied — go paste it');
+  }catch(e){}
+});
+function showToast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1800); }
+
+// confetti burst in campaign colors
+function burst(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const colors=['#c9a24a','#b1232e','#2e9e84','#f6f3ec','#16365f'];
+  for(let i=0;i<26;i++){
+    const c=document.createElement('div'); c.className='confetti';
+    c.style.left=Math.random()*100+'vw';
+    c.style.background=colors[i%colors.length];
+    c.style.animation=`fall ${0.9+Math.random()*0.8}s ${Math.random()*0.2}s ease-in forwards`;
+    c.style.transform=`rotate(${Math.random()*360}deg)`;
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(), 2000);
+  }
+}
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='ArrowLeft') choose('left');
+  else if(e.key==='ArrowRight') choose('right');
+  else if(e.key==='Enter' && $('actions').style.display!=='none') nextRound();
+});
+
+nextRound();
+</script>
+</body>
+</html>
